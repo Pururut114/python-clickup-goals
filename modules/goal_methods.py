@@ -5,12 +5,10 @@ from faker import Faker
 fake = Faker()
 config = dotenv_values(".env")
 
-# Общий заголовок с токеном авторизации и типом содержимого
 headers = {
-    "Authorization": config["TOKEN"],
+    "Authorization": config["CLICKUP_TOKEN"],
     "Content-Type": "application/json"
 }
-
 
 def create_goal():
     """
@@ -26,7 +24,6 @@ def create_goal():
     url = f"{config['BASE_URL']}/team/{config['CLICKUP_TEAM_ID']}/goal"
     return requests.post(url, headers=headers, json=body)
 
-
 def get_goals():
     """
     Отримує список всіх Goals.
@@ -34,14 +31,12 @@ def get_goals():
     url = f"{config['BASE_URL']}/team/{config['CLICKUP_TEAM_ID']}/goal"
     return requests.get(url, headers=headers)
 
-
 def get_goal(goal_id):
     """
     Отримує конкретний Goal за ID.
     """
     url = f"{config['BASE_URL']}/goal/{goal_id}"
     return requests.get(url, headers=headers)
-
 
 def update_goal(goal_id):
     """
@@ -55,7 +50,6 @@ def update_goal(goal_id):
     }
     url = f"{config['BASE_URL']}/goal/{goal_id}"
     return requests.put(url, headers=headers, json=updated_body)
-
 
 def delete_goal(goal_id):
     """
