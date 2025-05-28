@@ -1,59 +1,60 @@
+import os
 import requests
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from faker import Faker
 
-fake = Faker()
-config = dotenv_values(".env")
+load_dotenv()
 
-headers = {
-    "Authorization": config["CLICKUP_TOKEN"],
-    "Content-Type": "application/json"
+BASE_URL = os.environ["BASE_URL"]
+TEAM_ID = os.environ["CLICKUP_TEAM_ID"]
+TOKEN = os.environ["CLICKUP_TOKEN"]
+
+HEADERS = {
+    "Authorization": TOKEN,
+    "Content-Type": "application/json",
+    "Accept": "application/json"
 }
 
+fake = Faker()
+
 def create_goal():
-    """
-    Створює новий Goal з випадковим імʼям.
-    """
-    body = {
-        "name": fake.catch_phrase(),
-        "team_id": config["CLICKUP_TEAM_ID"],
+    url = f"{BASE_URL}/team/{TEAM_ID}/goal"
+    payload = {
+        "name": "Autotest Goal",
+        "description": "Created during pytest",
         "due_date": None,
-        "description": "Autotest Goal",
-        "multiple_owners": False
+        "multiple_owners": False,
+        "owners": [],
+        "color": "#32a852"
     }
-    url = f"{config['BASE_URL']}/team/{config['CLICKUP_TEAM_ID']}/goal"
-    return requests.post(url, headers=headers, json=body)
+    response = requests.post(url, headers=HEADERS, json=payload)
+    print("CREATE GOAL RESPONSE:", response.status_code, response.text)
+    if response.status_code == 200:
+        goal_id = response.json()["goal"]["id"]
+        with open("goal_id.txt", "w") as f:
+            f.write(goal_id)
+    return response
 
 def get_goals():
-    """
-    Отримує список всіх Goals.
-    """
-    url = f"{config['BASE_URL']}/team/{config['CLICKUP_TEAM_ID']}/goal"
-    return requests.get(url, headers=headers)
+    url = f"{BASE_URL}/team/{TEAM_ID}/goal"
+    return requests.get(url, headers=HEADERS)
 
 def get_goal(goal_id):
-    """
-    Отримує конкретний Goal за ID.
-    """
-    url = f"{config['BASE_URL']}/goal/{goal_id}"
-    return requests.get(url, headers=headers)
+    url = f"{BASE_URL}/goal/{goal_id}"
+    return requests.get(url, headers=HEADERS)
 
 def update_goal(goal_id):
-    """
-    Оновлює назву Goal.
-    """
-    updated_body = {
-        "name": f"Updated Goal - {fake.word()}",
+    url = f"{BASE_URL}/goal/{goal_id}"
+    payload = {
+        "name": "Updated Goal Name",
+        "description": "Updated via test",
         "due_date": None,
-        "description": "Updated by autotest",
-        "multiple_owners": False
+        "color": "#123456",
+        "add_owners": [],
+        "rem_owners": []
     }
-    url = f"{config['BASE_URL']}/goal/{goal_id}"
-    return requests.put(url, headers=headers, json=updated_body)
+    return requests.put(url, headers=HEADERS, json=payload)
 
 def delete_goal(goal_id):
-    """
-    Видаляє Goal за ID.
-    """
-    url = f"{config['BASE_URL']}/goal/{goal_id}"
-    return requests.delete(url, headers=headers)
+    url = f"{BASE_URL}/goal/{goal_id}"
+    return requests.delete(url, headers=HEADERS)
