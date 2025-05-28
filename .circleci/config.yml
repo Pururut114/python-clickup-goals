@@ -20,6 +20,7 @@ jobs:
           name: Run tests with HTML report
           command: |
             . venv/bin/activate
+            export PYTHONPATH=.
             pytest --template=html1/index.html --report=report.html
       - store_artifacts:
           path: report.html
