@@ -13,7 +13,6 @@ def test_create_goal():
     """
     response = create_goal()
     assert response.status_code == 200
-    yield  # Крок для CI
     goal_id = response.json()["id"]
     assert goal_id is not None
 
@@ -25,7 +24,6 @@ def test_get_goals():
     """
     response = get_goals()
     assert response.status_code == 200
-    yield
     assert isinstance(response.json()["goals"], list)
 
 @pytest.mark.order(3)
@@ -37,20 +35,16 @@ def test_goal_lifecycle():
     create_resp = create_goal()
     assert create_resp.status_code == 200
     goal_id = create_resp.json()["id"]
-    yield "Created goal"
 
     get_resp = get_goal(goal_id)
     assert get_resp.status_code == 200
     assert get_resp.json()["id"] == goal_id
-    yield "Fetched goal"
 
     update_resp = update_goal(goal_id)
     assert update_resp.status_code == 200
-    yield "Updated goal"
 
     delete_resp = delete_goal(goal_id)
     assert delete_resp.status_code == 200
-    yield "Deleted goal"
 
 @pytest.mark.order(4)
 @pytest.mark.steps("Try to GET goal with invalid token")
@@ -64,5 +58,4 @@ def test_get_with_invalid_token():
     }
     url = f"{config['BASE_URL']}/team/{config['CLICKUP_TEAM_ID']}/goal"
     response = requests.get(url, headers=invalid_headers)
-    yield
     assert response.status_code == 401
